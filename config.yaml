@@ -1,0 +1,66 @@
+--- # yaml config for exposing global constants
+    # dist means probability distribution in all the file
+
+app: "---------| KProducer |---------"
+
+limit:
+  articles: 100
+  users: 1000
+
+jars: "vendor/"
+data: "data/"
+
+servers:
+  kafka: 
+    host: 192.168.8.100
+    port: "9092"
+  redis:
+    host: 127.0.0.1
+    port: "6379"
+    db: 1
+  zookeeper:
+    host: 192.168.8.100
+    port: "2181"
+  web:
+    host: 127.0.0.1
+    port: "4000"
+
+actions: 
+  names:
+    - Purchasse
+    - Bookmark
+    - Comment
+    - Click
+    - Basket
+  dist: [0,0,0,0,100]
+
+
+cards: # debit cards
+  names:
+    - MasterCard
+    - Visa
+    - Maestro
+  dist: [30,40,30] 
+
+
+promotions:
+  names:
+    - promo_A
+    - promo_B
+    - promo_C
+    - promo_0 # for those who bought without promotions
+  dist: [28, 17, 25,30]
+
+
+quantities:
+  limsup: 100 # superior limit
+  values: [1, 2, 3, 4] 
+  static: false
+  # when static is false:
+  # values.pop()
+  # values.append(randint(liminf, limsup))
+  dist: [25,15,15, 45]
+
+
+data_comment: # number of comment in comments.csv
+  size: 744

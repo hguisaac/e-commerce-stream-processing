@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <title>Realtime|Dashboard</title>
+</head>
+<body>
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/d3/d3.min.js"></script>
+<script type="text/javascript">
+
+    var socket = io();
+    var toto = " 111"
+    var conCount = 0;
+    socket.on('connect', () => {
+      console.log("Client connected");
+      document.writeln("<h> Connection count: </h> "+conCount + "</br>");
+      conCount = conCount + 1;
+    });
+  
+
+    socket.on('update', (data) => {
+      document.writeln(data);
+      console.log(data);
+    })
+
+    socket.on("test", (data) => {
+      console.log(data);
+    })
+
+</script>
+</body>
+</html>
