@@ -1,34 +1,24 @@
-import re
-from datetime import datetime
-from collections import Counter
+import matplotlib
+matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
-from matplotlib import animation
-# uncomment if using in jupyter notebook
-# %matplotlib nbagg 
+import numpy as np
+from time import sleep
 
-def read_log(path, index, separator=chr(9)):
-    data = []
-    my_file = open(path,"r+")
-    rows = my_file.readlines()
-    for row in rows:
-        line = re.sub(r'\r\n|\r|\n','',row, flags=re.M)
-        if line != '':
-            data.append(line.split(separator)[index])
-    my_file.close()
-    return Counter(data)
+def animated_barplot():
+    # http://www.scipy.org/Cookbook/Matplotlib/Animations
+    mu, sigma = 100, 15
+    N = 4
+    x = mu + sigma*np.random.randn(N)
+    print(x)
+    rects = plt.bar(range(N), x,  align = 'center')
+    for i in range(50):
+        x = mu + sigma*np.random.randn(N)
+        for rect, h in zip(rects, x):
+            rect.set_height(h)
+        fig.canvas.draw()
+        # sleep(1)
 
 fig = plt.figure()
-ax = fig.add_subplot()
-counter_data = read_log(r'tmp.csv',2)
-plt.title('This is a title')
-bar = ax.bar(range(len(counter_data)), list(counter_data.values()), align='center')
-plt.xticks(range(len(counter_data)), list(counter_data.keys()))
-plt.tight_layout()
-plt.ylim((0, 30))
-
-def animate(val, counter_data):
-    data = list(counter_data.values())
-    for i in range(len(data)):
-        bar[i].set_height(data[i]+val)
-
-animation.FuncAnimation(fig, func=animate, frames=20, fargs=[counter_data], save_count=10)
+win = fig.canvas.manager.window
+win.after(100, animated_barplot)
+plt.show()

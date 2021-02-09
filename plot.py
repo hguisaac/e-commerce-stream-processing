@@ -12,8 +12,9 @@ men_means = [20, 34, 30, 35, 27]
 women_means = [25, 32, 34, 20, 25]
 childreen_means = [11, 25, 25, 32, 34]
 
+fig, ax = plt.subplots()
 
-def autolabel(rects, ax):
+def autolabel(rects):
         """Attach a text label above each bar in *rects*, displaying its height."""
         for rect in rects:
             height = rect.get_height()
@@ -23,8 +24,7 @@ def autolabel(rects, ax):
                         textcoords="offset points",
                         ha='center', va='bottom')
 
-fig, ax = plt.subplots()
-def graph(i):
+def graph():
 
     x = np.arange(len(labels[0]))  # the label locations
     width = 0.25  # the width of the bars
@@ -40,9 +40,9 @@ def graph(i):
     ax.set_xticklabels(labels[0])
     ax.legend()
 
-    # autolabel(rects1, ax)
-    # autolabel(rects2, ax)
-    # autolabel(rects3, ax)
+    autolabel(rects1)
+    autolabel(rects2)
+    autolabel(rects3)
 
     fig.tight_layout()
     return 
@@ -51,8 +51,7 @@ def graph(i):
 #                     init_func=init, blit=True)
 
 
-ani = FuncAnimation(
-    fig, graph, interval=3000, blit=True)
+graph()
 
 
 plt.show()

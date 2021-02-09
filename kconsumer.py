@@ -3,6 +3,7 @@ from helper import KAFKA_BOOTSTRAP_SERVERS, W, R
 from collections import namedtuple
 from functools import reduce
 from multiprocessing import Process
+from time import sleep
 import json
 
 
@@ -29,8 +30,7 @@ def get_consumer(topic):
     )
 
 
-
-def read_and_load_computation_into_global_var(global_var_name:str, source_topic):
+def read_and_load_computation_into_global_var(global_var_name:str, source_topic, graphing_func=None):
     # globar_var is the name of the global list which
     # will be used for graphing but as string
     Point = None
@@ -38,6 +38,7 @@ def read_and_load_computation_into_global_var(global_var_name:str, source_topic)
     # then real_global_var will be a global list ie python object 
     # having the name global_var
     real_global_var = globals()[global_var_name]
+
     isset_attributes = False
     for msg in consumer:
         try:
@@ -66,6 +67,9 @@ def read_and_load_computation_into_global_var(global_var_name:str, source_topic)
             )
         actualize_printing_cursor(real_global_var)
         print(real_global_var)
+        print("##############Real##############")
+        print(R, promotion_counts_points, W)
+        # graphing_func(real_global_var)
 
 # make each metric a process and  
 # make them to run asynchronously
@@ -94,19 +98,33 @@ most_bookmarked_article_process = Process(
     kwargs={"source_topic":"bookmark_sink"}
 )
 
-# start processes
-most_bably_commented_article_process.start()
+def live_grouped_bar_plot():
+    print("Lorem ipsum dolores at FOOBAR")
+    global promotion_counts_points
+    while True:
+        print("List::> ",promotion_counts_points)
+        for point in promotion_counts_points:
+            xtick = point.win_start + point.win_end
+            print(R,xtick,W)
+        sleep(4)
+        
+# plot_process = Process(
+#     target=live_grouped_bar_plot
+# )
+
+
+# plot_process.start()
+# plot_process.join()
+
+# # start processes
+# most_bably_commented_article_process.start()
 promotion_counts_process.start()
-most_clicked_article_process.start()
-most_bookmarked_article_process.start()
+# most_clicked_article_process.start()
+# most_bookmarked_article_process.start()
 
-# wait to the main process to complete 
-most_bably_commented_article_process.join()
+# # wait to the main process to complete 
+# most_bably_commented_article_process.join()
 promotion_counts_process.join()
-most_clicked_article_process.join()
-most_bookmarked_article_process.join()
-
-
-    
-    
+# most_clicked_article_process.join()
+# most_bookmarked_article_process.join()
 
