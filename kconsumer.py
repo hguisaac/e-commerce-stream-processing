@@ -1,24 +1,36 @@
 from kafka import KafkaConsumer
-from helper import KAFKA_BOOTSTRAP_SERVERS, W, R
+from helper import KAFKA_BOOTSTRAP_SERVERS, W, R, P, M, G
 from collections import namedtuple
 from functools import reduce
 from multiprocessing import Process
+from threading import Thread
 from time import sleep
 import json
+import sys
+import os
+import re
+import pickle
+import socket
+
+promotion_counts_list = []
+count_size_to_send = 3
+# will use 3*2 in the condition
+
+sckt = None
+def create_client_sckt(sckt_socket=("127.0.1.1", 33332)):
+    # global sckt
+    sckt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sckt.connect(sckt_socket)
+    return sckt
+
+def send_data(data:list):
+    global sckt
+    if sckt == None:
+        sckt = create_client_sckt()
+    serialized_data = pickle.dumps(data)
+    sckt.send(serialized_data)
 
 
-# TODO: use args, kwars in Process construtor instead of anonymous fonction
-# stacks to graph
-most_bably_commented_article_points = []
-promotion_counts_points = []
-most_clicked_article_points = []
-most_bookmarked_article_points = []
-
-def actualize_printing_cursor(some_list, size=4):
-    some_list_size = len(some_list)
-    if some_list_size > size:
-        del some_list[:some_list_size-size]
-    return some_list
 
 def get_consumer(topic):
     return (
@@ -30,101 +42,110 @@ def get_consumer(topic):
     )
 
 
-def read_and_load_computation_into_global_var(global_var_name:str, source_topic, graphing_func=None):
-    # globar_var is the name of the global list which
-    # will be used for graphing but as string
-    Point = None
-    consumer = get_consumer(source_topic)
-    # then real_global_var will be a global list ie python object 
-    # having the name global_var
-    real_global_var = globals()[global_var_name]
 
-    isset_attributes = False
+def update_promotion_count(
+    new_count,
+    promotion_counts_list=promotion_counts_list
+):
+    print("new_count", M, new_count, W)
+    some_count_has_been_updated = False
+    for line in promotion_counts_list:
+        if line[0] == new_count[0] and line[1] == new_count[1]:
+            line[2] = new_count[2]
+            some_count_has_been_updated = True
+            # as were are using update mode in spark we can not 
+            # have the same line many times, so we break
+            break
+    if some_count_has_been_updated == False:
+        promotion_counts_list.append(new_count)
+    print("After", promotion_counts_list)
+    if len(promotion_counts_list) == 2*count_size_to_send:
+        first_date = promotion_counts_list[0][0]
+        second_date = promotion_counts_list[1][0]
+        third_date = promotion_counts_list[2][0]
+        is_well_grouped = True
+        if first_date != second_date or first_date != third_date:
+            is_well_grouped = False
+        if is_well_grouped == True:  
+            data_to_send = promotion_counts_list[:count_size_to_send]
+            data_to_send.sort()
+            send_data(data_to_send)
+            promotion_counts_list = promotion_counts_list[count_size_to_send:]
+        else:
+            promotion_counts_list = promotion_counts_list[1:]
+    return promotion_counts_list
+
+
+def read_and_load_computation_into_global_var(
+    global_variable_name:str, 
+    source_topic, 
+    update_data_func
+):
+    
+    # globar_variable_name is the name of the global 
+    # list whichwill be used for graphing but as string
+    consumer = get_consumer(source_topic)
+    # then real_global_variable will be a global list ie python object 
+    # having the name global_var
+    real_global_variable = globals()[global_variable_name]
+
+    
     for msg in consumer:
         try:
             value = json.loads(msg.value.decode())
-            if isset_attributes is False:
-                # create a namedtuple with value.keys()
-                Point = namedtuple(
-                    "Point", 
-                    reduce(
-                        lambda a, b: a + " " + b,
-                        value.keys()
-                    )
-                )
-                isset_attributes = True
-            
-        except Exception as exception:
-            print(R,exception,W)
-            # the presence of the instruction continue is very important
-            continue
-        # create a Point namedtuples object using value.values()
-        # and append this object into related global variable
-        real_global_var.append(
-                Point(
-                    *(value.values())
-                )
+            start_match = re.search("\d\d:\d\d:\d\d", value["win_start"])
+            end_match = re.search("\d\d:\d\d:\d\d", value["win_end"])
+            if start_match == None:
+                start_match = re.search("\d\d:\d\d:\d\d", value["win_start"])
+            if end_match == None:
+                end_match = re.search("\d\d:\d\d:\d\d", value["win_start"])
+
+            assert start_match != None
+            assert end_match != None
+
+            time_win = (
+                value["win_start"][start_match.start():start_match.end()]
+                +
+                "-"
+                +
+                value["win_end"][end_match.start():end_match.end()]
             )
-        actualize_printing_cursor(real_global_var)
-        print(real_global_var)
-        print("##############Real##############")
-        print(R, promotion_counts_points, W)
-        # graphing_func(real_global_var)
 
-# make each metric a process and  
-# make them to run asynchronously
+            # we don't want to go back
+            
+            values_list = list(value.values())[2:]
+            values_list.insert(0, time_win)
 
-most_bably_commented_article_process = Process(
-    target=read_and_load_computation_into_global_var,
-    args=["most_bably_commented_article_points"],
-    kwargs={"source_topic":"comment_sink"}
-)
-
-promotion_counts_process = Process(
-    target=read_and_load_computation_into_global_var,
-    args=["promotion_counts_points"],
-    kwargs={"source_topic":"purchasse_sink"}
-)
-
-most_clicked_article_process = Process(
-    target=read_and_load_computation_into_global_var,
-    args=["most_clicked_article_points"],
-    kwargs={"source_topic":"click_sink"}
-)
-
-most_bookmarked_article_process = Process(
-    target=read_and_load_computation_into_global_var,
-    args=["most_bookmarked_article_points"],
-    kwargs={"source_topic":"bookmark_sink"}
-)
-
-def live_grouped_bar_plot():
-    print("Lorem ipsum dolores at FOOBAR")
-    global promotion_counts_points
-    while True:
-        print("List::> ",promotion_counts_points)
-        for point in promotion_counts_points:
-            xtick = point.win_start + point.win_end
-            print(R,xtick,W)
-        sleep(4)
+            real_global_variable = update_data_func(
+                values_list,
+                real_global_variable
+            )
         
-# plot_process = Process(
-#     target=live_grouped_bar_plot
+        except Exception as exception:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(R, exception, fname, "line", exc_tb.tb_lineno, W)
+            continue
+        # actualize_printing_cursor(real_global_variable)
+        print("______________________________________")
+        print("______________________________________")
+        # print(R, promotion_c31ounts_points, W)
+
+    
+promotion_counts_thread = Thread(
+    target=read_and_load_computation_into_global_var,
+    args=["promotion_counts_list"],
+    kwargs={
+        "source_topic":"purchasse_sink",
+        "update_data_func":update_promotion_count
+    }
+)
+
+# promotion_counts_plot_thread = Thread(
+#     target=promotion_counts_plot
 # )
 
-
-# plot_process.start()
-# plot_process.join()
-
-# # start processes
-# most_bably_commented_article_process.start()
-promotion_counts_process.start()
-# most_clicked_article_process.start()
-# most_bookmarked_article_process.start()
-
-# # wait to the main process to complete 
-# most_bably_commented_article_process.join()
-promotion_counts_process.join()
-# most_clicked_article_process.join()
-# most_bookmarked_article_process.join()
-
+print("starting thread")
+promotion_counts_thread.start()
+promotion_counts_thread.join()
+print("after starting thread")

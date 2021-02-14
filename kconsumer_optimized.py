@@ -1,13 +1,15 @@
 from kafka import KafkaConsumer
-from helper import KAFKA_BOOTSTRAP_SERVERS, W, R, P
+from helper import KAFKA_BOOTSTRAP_SERVERS, W, R, P, M, G
 from collections import namedtuple
 from functools import reduce
 from multiprocessing import Process
+from threading import Thread
 from time import sleep
 import json
 import sys
 import os
 import re
+
 
 
 
@@ -29,7 +31,7 @@ def update_promotion_count(
     new_count,
     promotion_counts_list=promotion_counts_list
 ):
-    print("I can enter with", new_count)
+    print("new_count", M, new_count, W)
     some_count_has_been_updated = False
     for line in promotion_counts_list:
         if line[0] == new_count[0] and line[1] == new_count[1]:
@@ -40,6 +42,8 @@ def update_promotion_count(
             break
     if some_count_has_been_updated == False:
         promotion_counts_list.append(new_count)
+    print("After", promotion_counts_list)
+        
     return promotion_counts_list
 
 
@@ -59,35 +63,32 @@ def get_consumer(topic):
         )
     )
 
+# un processus peut avoir deux thread 
+# donc : je peux utiliser un thread 
+
+def promotion_counts_plot():
+    global promotion_counts_list
+    while True:
+        print("Grapher", G, promotion_counts_list, W)
+    pass
+    
+
 
 def read_and_load_computation_into_global_var(
     global_variable_name:str, 
     source_topic, 
     update_data_func
 ):
-    # globar_var is the name of the global list which
-    # will be used for graphing but as string
-    Point = None
+    # globar_variable_name is the name of the global 
+    # list whichwill be used for graphing but as string
     consumer = get_consumer(source_topic)
     # then real_global_variable will be a global list ie python object 
     # having the name global_var
     real_global_variable = globals()[global_variable_name]
 
-    isset_attributes = False
     for msg in consumer:
         try:
             value = json.loads(msg.value.decode())
-            print(P, value, W)
-            # if isset_attributes is False:
-               # # create a namedtuple with value.keys()
-                # Point = namedtuple(
-                    # "Point", 
-                    # reduce(
-                        # lambda a, b: a + " " + b,
-                        # value.keys()
-                    # )
-                # )
-                # isset_attributes = True
             start_match = re.search("\d\d:\d\d:\d\d", value["win_start"])
             end_match = re.search("\d\d:\d\d:\d\d", value["win_end"])
             if start_match == None:
@@ -113,19 +114,15 @@ def read_and_load_computation_into_global_var(
                 values_list,
                 real_global_variable
             )
-            # print(real_global_variable)
+        
         except Exception as exception:
-            # print(R,exception,W)
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(R, exception, fname, "line", exc_tb.tb_lineno, W)
-            # the presence of the instruction continue is very important
             continue
-        # TODO: the sizing update in update_data_func method
-        print(real_global_variable)
-        actualize_printing_cursor(real_global_variable)
-        print(real_global_variable)
-        print("##############Real##############")
+        # actualize_printing_cursor(real_global_variable)
+        print("______________________________________")
+        print("______________________________________")
         # print(R, promotion_counts_points, W)
 
 # parallelization
@@ -136,7 +133,7 @@ def read_and_load_computation_into_global_var(
 #     kwargs={"source_topic":"comment_sink"}
 # )
 
-promotion_counts_process = Process(
+promotion_counts_thread = Thread(
     target=read_and_load_computation_into_global_var,
     args=["promotion_counts_list"],
     kwargs={
@@ -144,6 +141,11 @@ promotion_counts_process = Process(
         "update_data_func":update_promotion_count
     }
 )
+
+promotion_counts_plot_thread = Thread(
+    target=promotion_counts_plot
+)
+
 
 # most_clicked_article_process = Process(
 #     target=read_and_load_computation_into_global_var,
@@ -156,33 +158,26 @@ promotion_counts_process = Process(
 #     args=["most_bookmarked_article_points"],
 #     kwargs={"source_topic":"bookmark_sink"}
 # )
-
-# def live_grouped_bar_plot():
-#     print("Lorem ipsum dolores at FOOBAR")
-#     global promotion_counts_points
-#     while True:
-#         print("List::> ",promotion_counts_points)
-#         for point in promotion_counts_points:
-#             xtick = point.win_start + point.win_end
-#             print(R,xtick,W)
-#         sleep(4)
         
 # plot_process = Process(
 #     target=live_grouped_bar_plot
 # )
-
 
 # plot_process.start()
 # plot_process.join()
 
 # # start processes
 # most_bably_commented_article_process.start()
-promotion_counts_process.start()
+promotion_counts_thread.start()
 # most_clicked_article_process.start()
 # most_bookmarked_article_process.start()
 
 # # wait to the main process to complete 
 # most_bably_commented_article_process.join()
-promotion_counts_process.join()
+promotion_counts_plot_thread.start()
+promotion_counts_thread.join()
+promotion_counts_plot_thread.join()
+
 # most_clicked_article_process.join()
 # most_bookmarked_article_process.join()
+

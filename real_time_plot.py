@@ -1,12 +1,10 @@
-
-
-#--------------------------------------------------
-
-# libraries
 import numpy as np
 import matplotlib.pyplot as plt
+from random import shuffle
+from threading import Thread
 from random import shuffle, randint
 from time import sleep
+import asyncio
 # set width of bar
 barWidth = 0.25
  
@@ -23,37 +21,64 @@ r3 = [x + barWidth for x in r2]
 
 isset_legend = False
 
-def get_plotted():
-    global isset_legend
+async def update_bars():
     global bars1, bars2, bars3
-    x_list = ['14:11-14:11', 'B', 'C', 'D', 'E']
-    while True:
-        # Make the plot
-        
-        padding_list1 = [ randint(0,5) for __ in range(5)]
-        padding_list2 = [ randint(0,5) for __ in range(5)]
-        padding_list3 = [ randint(0,5) for __ in range(5)]
-        plt.bar(r1, padding_list1, color='#7f6d5f', width=barWidth, edgecolor='white', label='var1')
-        plt.bar(r2, padding_list2, color='#557f2d', width=barWidth, edgecolor='white', label='var2')
-        plt.bar(r3, padding_list3, color='#2d7f5e', width=barWidth, edgecolor='white', label='var3')
-        print(x_list, padding_list1, padding_list2, padding_list3)
-        # Add xticks on the middle of the group bars
-        plt.xlabel('group', fontweight='bold')
-        
-        if isset_legend == False:
-            plt.legend()
-            isset_legend = True
+    print("just get into update_bars")
+    shuffle(bars1)
+    shuffle(bars2)
+    shuffle(bars3)
+    return bars1, bars2, bars3
+    
+    
+    
 
-        plt.xticks([r + barWidth for r in range(len(bars1))], x_list)
-        shuffle(x_list)
-        # print(x_list)
-        fig.canvas.draw()
-        sleep(2)
-        plt.cla()
+# thread_update = Thread(
+#     target=update_bars
+# )
+
+# thread_update.start()
+# thread_update.join()
+
+
+async def get_plotted():
+    global isset_legend
+    # global 
+    x_list = ['14:11-14:11', 'B', 'C', 'D', 'E']
+    
+    # Make the plot
+    bars1, bars2, bars3 = await update_bars()
+    print(bars1, bars2, bars3)
+
+    plt.bar(r1, bars1, color='#7f6d5f', width=barWidth, edgecolor='white', label='var1')
+    plt.bar(r2, bars2, color='#557f2d', width=barWidth, edgecolor='white', label='var2')
+    plt.bar(r3, bars3, color='#2d7f5e', width=barWidth, edgecolor='white', label='var3')
+    # print(x_list, bars1, bars2, bars3)
+    # Add xticks on the middle of the group bars
+    plt.xlabel('group', fontweight='bold')
+    
+    if isset_legend == False:
+        plt.legend()
+        isset_legend = True
+
+    plt.xticks([r + barWidth for r in range(len(bars1))], x_list)
+    shuffle(x_list)
+    # print(x_list)
+    fig.canvas.draw()
+    sleep(2)
+    plt.cla()
+        
     
     # Create legend & Show graphic
 
-fig = plt.figure()
-win = fig.canvas.manager.window
-win.after(100, get_plotted)
-plt.show()
+if __name__ == "__main__":
+    fig = plt.figure()
+    win = fig.canvas.manager.window
+    win.after(100, get_plotted)
+    plt.show()
+
+    r = get_plotted()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(r)
+
+
+

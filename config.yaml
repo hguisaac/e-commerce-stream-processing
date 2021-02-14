@@ -12,14 +12,14 @@ data: "data/"
 
 servers:
   kafka: 
-    host: 192.168.8.100
+    host: 127.0.0.1
     port: "9092"
   redis:
     host: 127.0.0.1
     port: "6379"
     db: 1
   zookeeper:
-    host: 192.168.8.100
+    host: 127.0.0.1
     port: "2181"
   web:
     host: 127.0.0.1
@@ -31,8 +31,7 @@ actions:
     - Bookmark
     - Comment
     - Click
-    - Basket
-  dist: [0,0,0,0,100]
+  dist: [100,0,0,0]
 
 
 cards: # debit cards
@@ -47,9 +46,8 @@ promotions:
   names:
     - promo_A
     - promo_B
-    - promo_C
     - promo_0 # for those who bought without promotions
-  dist: [28, 17, 25,30]
+  dist: [50, 30, 20]
 
 
 quantities:

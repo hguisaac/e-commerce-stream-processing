@@ -53,5 +53,4 @@ def graph():
 
 graph()
 
-
 plt.show()
