@@ -17,7 +17,7 @@ servers:
   redis:
     host: 127.0.0.1
     port: "6379"
-    db: 1
+    db: 3
   zookeeper:
     host: 127.0.0.1
     port: "2181"
@@ -31,7 +31,7 @@ actions:
     - Bookmark
     - Comment
     - Click
-  dist: [100,0,0,0]
+  dist: [0,0,100,0]
 
 
 cards: # debit cards

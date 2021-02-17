@@ -2,9 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from random import shuffle, randint
 from time import sleep
+# from ..helper import R,W
 from collections import deque
 import socket 
 import pickle
+
 
 # bind each promotion (promo_[0,A,B]) to each bar
 # bind each count to the appropriate bar height
@@ -35,10 +37,14 @@ x_bar1 = np.arange(N_GROUPED_BARS)
 x_bar2 = [x + BAR_WIDTH for x in x_bar1]
 x_bar3 = [x + BAR_WIDTH for x in x_bar2]
 
+isset_legend = False
+isset_bars_label = False
+
 def animate():
 
     isset_legend = False
     isset_bars_label = False
+
     # BEGIN SOCKET_INIT
     sckt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     hostname = socket.gethostname()
@@ -117,6 +123,10 @@ def animate():
                 # no more data -- quit the loop
                 print ("no more data.")
                 # break
+    except Exception as exception:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exception, fname, "line", exc_tb.tb_lineno)
     finally:
         # clean up the connection
         # connection.close()
@@ -124,7 +134,7 @@ def animate():
     
 
 # make the plot
-fig = plt.figure()
+fig = plt.figure(figsize=(11,6))
 win = fig.canvas.manager.window
 win.after(100, animate)
 plt.show()

@@ -143,6 +143,7 @@ class Generator:
             db=REDIS_SERVER["db"]
         )
         body = rconn.get(randint(1,conf["data_comment"]["size"]))
+        print(R, body, W)
         if body != None:
             body = body.decode('ASCII')
         return body

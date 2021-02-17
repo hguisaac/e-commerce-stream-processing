@@ -37,12 +37,6 @@ SOURCE = "kafka"
 SINK = "kafka"
 CHECKPOINT_LOCATION = "vendor/spark/checkpoint"
 
-COMMENT_HUMOURS= {
-    "bad":"BAD",
-    "good":"GOOD",
-    "neutral":"NEUTRAL"
-}
-
 ssession = ( 
     SparkSession.builder 
                 .master('local[2]') 
@@ -219,7 +213,7 @@ def compute_most_bookmarked_article (
     win_start="1 minutes"
 ):
     source_topic = "bookmark"
-    df = get_formatted_dfstream(source_topic=souBADBADrce_topic, source=SOURCE)
+    df = get_formatted_dfstream(source_topic=source_topic, source=SOURCE)
     df = (
         df
         .withWatermark("timestamp", watermark_time)
@@ -231,7 +225,7 @@ def compute_most_bookmarked_article (
 
     # df.printSchema()
     # root
-    # |-- window: struct (nullable = false)BAD
+    # |-- window: struct (nullable = false)
     # |    |-- start: timestamp (nullable = true)
     # |    |-- end: timestamp (nullable = true)
     # |-- event_value[aid]: string (nullable = true)
@@ -270,7 +264,6 @@ def compute_most_badly_commented_article (
         .withWatermark("timestamp", watermark_time)
         .groupBy(
             window(df.timestamp, win_size, win_sliding, win_start),
-            df.event_value.aid,
             "customer_humour"
         ).count()      
     )
@@ -289,10 +282,8 @@ def compute_most_badly_commented_article (
             col("window.start").alias("win_start"),
             col("window.end").alias("win_end"),
             col("customer_humour").alias("humour"),
-            col("event_value[aid]").alias("article_id"),
             col("count")
         )
-        .where(col("customer_humour") == COMMENT_HUMOURS["bad"])
     )
 
     return write_computation(df, processing_time="2 seconds", sink=SINK, sink_topic=source_topic+"_sink")
@@ -337,10 +328,10 @@ def compute_most_badly_commented_article (
 
 
 
-# compute_promotion_counts()
+compute_promotion_counts().awaitTermination()
 # compute_most_clicked_article()
 # compute_most_bookmarked_article()
-compute_most_badly_commented_article().awaitTermination()
+# compute_most_badly_commented_article()
 
 
 # ssession.streams.awaitAnyTermination()

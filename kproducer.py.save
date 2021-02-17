@@ -29,8 +29,9 @@ def produce_event():
         event = Generator.emit() 
         producer.send(topic=event.action, value=event.__dict__)
         produce_event.count += 1
-        print(event) 
-        print("event_count", C, "%", produce_event.count, W)
+        # stdout looks good flush the buffer
+        stdout.write(str(event))
+        stdout.write("event_count " + C + " % " + str(produce_event.count) + W)
         sleep(random()) 
     
 produce_event.count = 0

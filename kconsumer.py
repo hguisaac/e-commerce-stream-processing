@@ -14,7 +14,7 @@ import socket
 
 promotion_counts_list = []
 count_size_to_send = 3
-# will use 3*2 in the condition
+# will use count_size_to_send*2 in the condition 
 
 sckt = None
 def create_client_sckt(sckt_socket=("127.0.1.1", 33332)):

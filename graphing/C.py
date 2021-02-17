@@ -31,7 +31,7 @@ while True:
     send_data(l)
 #     data = pickle.dumps(l)
 #     sckt.send(data)
-    sleep(40)
+    sleep(4)
 
 # receive data from server
 # data_from_server = sckt.recv(1024000);
