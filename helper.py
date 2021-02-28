@@ -32,6 +32,8 @@ PROMOTIONS              = conf["promotions"]["names"]
 KAFKA_BOOTSTRAP_SERVERS = ":".join(conf["servers"]["kafka"].values())
 JARS_DIR                = path.join(path.abspath("") + "/" + conf["jars"])
 REDIS_SERVER            = conf["servers"]["redis"]
+METRICS_SOCKETS         = conf["servers"]["graphing_sockets"]
+
 
 
 class Event:
@@ -143,7 +145,6 @@ class Generator:
             db=REDIS_SERVER["db"]
         )
         body = rconn.get(randint(1,conf["data_comment"]["size"]))
-        print(R, body, W)
         if body != None:
             body = body.decode('ASCII')
         return body

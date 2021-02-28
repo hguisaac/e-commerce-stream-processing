@@ -1,17 +1,17 @@
 --- # yaml config for exposing global constants
-    # dist means probability distribution in all the file
+    # dist stands for probability distribution
 
 app: "---------| KProducer |---------"
 
 limit:
-  articles: 100
+  articles: 50
   users: 1000
 
 jars: "vendor/"
 data: "data/"
 
 servers:
-  kafka: 
+  kafka:  
     host: 127.0.0.1
     port: "9092"
   redis:
@@ -24,6 +24,19 @@ servers:
   web:
     host: 127.0.0.1
     port: "4000"
+  graphing_sockets:
+    metric1:
+      host: 127.0.1.1
+      port: 33331
+    metric2:
+      host: 127.0.1.1
+      port: 33332
+    metric3:
+      host: 127.0.1.1
+      port: 33333
+    metric4:
+      host: 127.0.1.1
+      port: 33334
 
 actions: 
   names:
@@ -31,7 +44,7 @@ actions:
     - Bookmark
     - Comment
     - Click
-  dist: [0,0,100,0]
+  dist: [25,25,25,25]
 
 
 cards: # debit cards

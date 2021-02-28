@@ -147,6 +147,7 @@ def compute_promotion_counts (
     win_column=None, 
     win_size="2 minutes",  
     win_sliding="2 minutes", 
+    # win_start < win_sliding
     win_start="1 minutes"
 ):
     source_topic = "purchasse"
@@ -159,7 +160,8 @@ def compute_promotion_counts (
             # start_time must be less than sliding_time
             window(df.timestamp, win_size, win_sliding, win_start),
             df.event_value.promotion
-        ).count()      
+        )
+        .count()      
     )
 
     # df.printSchema()
@@ -190,7 +192,7 @@ def compute_promotion_counts (
 
     return write_computation(df, processing_time="2 seconds", sink=SINK, sink_topic=source_topic+"_sink")
 
-def compute_most_clicked_article (
+def compute_click_counts (
     watermark_time="2 hours", 
     win_column=None, 
     win_size="2 minutes",  
@@ -205,13 +207,33 @@ def compute_most_clicked_article (
         .groupBy(
             window(df.timestamp, win_size, win_sliding, win_start),
             df.event_value.aid
-        ).max()      
+        )
+        .count()
     )
+    
+    # df = df.agg(max(df.count))
+    print(df)
+    df = (
+        df
+        .select(
+            col("window.start").alias("win_start"),
+            col("window.end").alias("win_end"),
+            col("event_value[aid]").alias("promo"),
+            col("count")
+        )
+    )
+    
+    # df.printSchema()
+    # root
+    # |-- win_start: timestamp (nullable = true)
+    # |-- win_end: timestamp (nullable = true)
+    # |-- promo: string (nullable = true)
+    # |-- count: long (nullable = false)
 
     return write_computation(df, processing_time="2 seconds", sink=SINK, sink_topic=source_topic+"_sink")
 
 
-def compute_most_bookmarked_article (
+def compute_bookmark_counts (
     watermark_time="2 hours", 
     win_column=None, 
     win_size="2 minutes",  
@@ -219,17 +241,17 @@ def compute_most_bookmarked_article (
     win_start="1 minutes"
 ):
     source_topic = "bookmark"
-    df = get_formatted_dfstream(source_topic=souBADBADrce_topic, source=SOURCE)
+    df = get_formatted_dfstream(source_topic=source_topic, source=SOURCE)
     df = (
         df
         .withWatermark("timestamp", watermark_time)
         .groupBy(
             window(df.timestamp, win_size, win_sliding, win_start),
             df.event_value.aid
-        ).max()      
+        ).count()
     )
-
-    # df.printSchema()
+    # 
+    df.printSchema()
     # root
     # |-- window: struct (nullable = false)BAD
     # |    |-- start: timestamp (nullable = true)
@@ -241,18 +263,19 @@ def compute_most_bookmarked_article (
         .select(
             col("window.start").alias("win_start"),
             col("window.end").alias("win_end"),
-            col("event_value[aid]").alias("article_id")
+            col("event_value[aid]").alias("article_id"),
+            col("count")
         )
     )
     
     return write_computation(df, processing_time="2 seconds", sink=SINK, sink_topic=source_topic+"_sink")
 
-def compute_most_badly_commented_article (
+def article_humour_counts (
     watermark_time="2 hours", 
     win_column=None, 
-    win_size="2 minutes",  
-    win_sliding="2 minutes", 
-    win_start="1 minutes"
+    win_size="2 hours",  
+    win_sliding="2 hours", 
+    win_start="1 hours"
 ):
     source_topic = "comment"
     df = get_formatted_dfstream(source_topic=source_topic, source=SOURCE)
@@ -292,7 +315,7 @@ def compute_most_badly_commented_article (
             col("event_value[aid]").alias("article_id"),
             col("count")
         )
-        .where(col("customer_humour") == COMMENT_HUMOURS["bad"])
+        # .where(col("customer_humour") == COMMENT_HUMOURS["bad"])
     )
 
     return write_computation(df, processing_time="2 seconds", sink=SINK, sink_topic=source_topic+"_sink")
@@ -304,43 +327,42 @@ def compute_most_badly_commented_article (
 #     )
 # )
 
-# compute_most_clicked_article_process = Process(
+# compute_click_counts_process = Process(
 #     target=(
-#         lambda:compute_most_clicked_article().awaitTermination()
+#         lambda:compute_click_counts().awaitTermination()
 #     )
 # )
 
-# compute_most_bookmarked_article_process = Process(
+# compute_bookmark_counts_process = Process(
 #     target=(
-#         lambda:compute_most_bookmarked_article().awaitTermination()   
+#         lambda:compute_bookmark_counts().awaitTermination()   
 #     )
 # )
 
-# compute_most_badly_commented_article_process = Process(
+# article_humour_counts_process = Process(
 #     target=(
-#         lambda:compute_most_badly_commented_article().awaitTermination()
+#         lambda:article_humour_counts().awaitTermination()
 #     )
 # )
 
 
 # start processes
 # compute_promotion_counts_process.start()
-# compute_most_clicked_article_process.start()
-# compute_most_bookmarked_article_process.start()
-# compute_most_badly_commented_article_process.start()
+# compute_click_counts_process.start()
+# compute_bookmark_counts_process.start()
+# article_humour_counts_process.start()
 
 # 
 # compute_promotion_counts_process.join()
-# compute_most_clicked_article_process.join()
-# compute_most_bookmarked_article_process.join()
-# compute_most_badly_commented_article_process.join()
+# compute_click_counts_process.join()
+# compute_bookmark_counts_process.join()
+# article_humour_counts_process.join()
 
 
 
-# compute_promotion_counts()
-# compute_most_clicked_article()
-# compute_most_bookmarked_article()
-compute_most_badly_commented_article().awaitTermination()
-
+# compute_promotion_counts().awaitTermination()
+# compute_click_counts().awaitTermination()
+# compute_bookmark_counts()
+article_humour_counts().awaitTermination()
 
 # ssession.streams.awaitAnyTermination()

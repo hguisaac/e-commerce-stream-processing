@@ -24,14 +24,17 @@ producer = KafkaProducer(
 )(APP_NAME, 10)
 
 
-def produce_event():
+def produce_event_forever():
     while True:
         event = Generator.emit() 
         producer.send(topic=event.action, value=event.__dict__)
-        produce_event.count += 1
+        produce_event_forever.count += 1
         print(event) 
-        print("event_count", C, "%", produce_event.count, W)
+        print("event_count", C, "%", produce_event_forever.count, W)
+        # wait a few milliseconds
         sleep(random()) 
+        if produce_event_forever.count == 200:
+            sleep(100000)
     
-produce_event.count = 0
-produce_event()
+produce_event_forever.count = 0
+produce_event_forever()
