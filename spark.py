@@ -358,8 +358,8 @@ def article_humour_counts (
 
 
 
-compute_promotion_counts().awaitTermination()
-# compute_click_counts().awaitTermination()
+# compute_promotion_counts().awaitTermination()
+compute_click_counts().awaitTermination()
 # compute_bookmark_counts()
 # article_humour_counts().awaitTermination()
 

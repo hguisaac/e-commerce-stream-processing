@@ -31,33 +31,21 @@ def sckt_connect(sckt_addr:dict):
     return sckt
 
 
-click_socket_address = ("127.0.1.1", 33333)
 
+# def create_client_sckt(socket_address=("127.0.1.1", 33332)):
+#     # global sckt
+#     sckt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#     sckt.connect(socket_address)
+#     return sckt
 
-sckt = None
-def create_client_sckt(socket_address=("127.0.1.1", 33332)):
-    # global sckt
-    sckt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sckt.connect(socket_address)
-    return sckt
-
-def send_data_to_socket_server(data:list):
+def send_data():
     pass
 
-
-
-def send_data(data:list):
-    global sckt
-    if sckt == None:
-        sckt = create_client_sckt()
-    serialized_data = pickle.dumps(data)
-    sckt.send(serialized_data)
-
-
 # send_data.promotion_count_sckt = sckt_connect(METRICS_SOCKETS["metric1"])
-# send_data.click_count_sckt = sckt_connect(METRICS_SOCKETS["metric2"])
+send_data.click_count_sckt = sckt_connect(METRICS_SOCKETS["metric2"])
 # send_data.bookmark_count_sckt = sckt_connect(METRICS_SOCKETS["metric3"])
-send_data.article_humour_count_sckt = sckt_connect(METRICS_SOCKETS["metric4"])
+# send_data.article_humour_count_sckt = sckt_connect(METRICS_SOCKETS["metric4"])
+
 
 
 def get_consumer(topic):
@@ -71,21 +59,21 @@ def get_consumer(topic):
 
 
 def update_promotion_count_cursor_within_socket(
-    new_count,
+    new_record,
     promotion_counts_list=promotion_counts_list
 ):
-    print("new_count", M, new_count, W)
+    # print("new_record", M, new_record, W)
     some_count_has_been_updated = False
     for line in promotion_counts_list:
-        if line[0] == new_count[0] and line[1] == new_count[1]:
-            line[2] = new_count[2]
+        if line[0] == new_record[0] and line[1] == new_record[1]:
+            line[2] = new_record[2]
             some_count_has_been_updated = True
             # as were are using update mode in spark we can not 
             # have the same line many times, so we break
             break
     if some_count_has_been_updated == False:
-        promotion_counts_list.append(new_count)
-    print("After", promotion_counts_list)
+        promotion_counts_list.append(new_record)
+    # print("After", promotion_counts_list)
     if len(promotion_counts_list) == 2*count_size_to_send:
         first_date = promotion_counts_list[0][0]
         second_date = promotion_counts_list[1][0]
@@ -96,7 +84,8 @@ def update_promotion_count_cursor_within_socket(
         if is_well_grouped == True:  
             data_to_send = promotion_counts_list[:count_size_to_send]
             data_to_send.sort()
-            send_data(data_to_send)
+            send_data.promotion_count_sckt.send(pickle.dumps(data_to_send))
+            print("data_to_send", data_to_send)
             promotion_counts_list = promotion_counts_list[count_size_to_send:]
         else:
             promotion_counts_list = promotion_counts_list[1:]
@@ -174,9 +163,8 @@ def read_and_load_computation_into_global_var(
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(R, exception, fname, "line", exc_tb.tb_lineno, W)
             continue
-        print("______________________________________")
-        print("______________________________________")
-        # print(R, promotion_counts_points, W)
+        print("__"*20)
+
 
 
 
@@ -219,14 +207,14 @@ article_bad_comment_count_thread = Thread(
 )
 
 print("starting threads")
-promotion_counts_thread.start()
-# article_bad_comment_count_thread.start()
+# promotion_counts_thread.start()
+click_counts_thread.start()
 # bookmark_counts_thread.start()
-# click_counts_thread.start()
+# article_bad_comment_count_thread.start()
 
 print("joining threads")
-promotion_counts_thread.join()
-# article_bad_comment_count_thread.join()
+# promotion_counts_thread.join()
+click_counts_thread.join()
 # bookmark_counts_thread.join()
-# click_counts_thread.join()
+# article_bad_comment_count_thread.join()
 
