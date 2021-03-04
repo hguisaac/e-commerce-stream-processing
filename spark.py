@@ -211,14 +211,12 @@ def compute_click_counts (
         .count()
     )
     
-    # df = df.agg(max(df.count))
-    print(df)
     df = (
         df
         .select(
             col("window.start").alias("win_start"),
             col("window.end").alias("win_end"),
-            col("event_value[aid]").alias("promo"),
+            col("event_value[aid]").alias("article_id"),
             col("count")
         )
     )
@@ -360,9 +358,9 @@ def article_humour_counts (
 
 
 
-# compute_promotion_counts().awaitTermination()
+compute_promotion_counts().awaitTermination()
 # compute_click_counts().awaitTermination()
 # compute_bookmark_counts()
-article_humour_counts().awaitTermination()
+# article_humour_counts().awaitTermination()
 
 # ssession.streams.awaitAnyTermination()

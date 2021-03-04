@@ -44,7 +44,7 @@ actions:
     - Bookmark
     - Comment
     - Click
-  dist: [25,25,25,25]
+  dist: [0,0,0,100]
 
 
 cards: # debit cards

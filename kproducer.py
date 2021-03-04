@@ -31,10 +31,10 @@ def produce_event_forever():
         produce_event_forever.count += 1
         print(event) 
         print("event_count", C, "%", produce_event_forever.count, W)
-        # wait a few milliseconds
+        
         sleep(random()) 
-        if produce_event_forever.count == 200:
-            sleep(100000)
+        # if produce_event_forever.count == 200:
+        #     sleep(100000)
     
 produce_event_forever.count = 0
 produce_event_forever()

@@ -219,14 +219,14 @@ article_bad_comment_count_thread = Thread(
 )
 
 print("starting threads")
-# promotion_counts_thread.start()
-article_bad_comment_count_thread.start()
+promotion_counts_thread.start()
+# article_bad_comment_count_thread.start()
 # bookmark_counts_thread.start()
 # click_counts_thread.start()
 
 print("joining threads")
-# promotion_counts_thread.join()
-article_bad_comment_count_thread.join()
+promotion_counts_thread.join()
+# article_bad_comment_count_thread.join()
 # bookmark_counts_thread.join()
 # click_counts_thread.join()
 
