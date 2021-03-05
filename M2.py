@@ -5,19 +5,9 @@ import pickle
 from random import shuffle, randint
 from time import sleep
 from collections import deque
-from helper import AID_LIMIT
+from helper import AID_LIMIT, METRICS_SOCKETS
 
-# bind each promotion (promo_[0,A,B]) to each bar
-# bind each count to the appropriate bar height
 
-BAR_WIDTH = 0.25
-BARS_COLOR = ["#64B5F6", "#ef9a9a", "#00796B"]
-
-# we use the term window for grouped bar to contextualize
-# this "window" is different from the one provided by pyplot
-
-# number of windows
-N_GROUPED_BARS = 4
 
 def autolabel(rects):
     # attach a text label above each bar in rects, displaying its height
@@ -31,10 +21,6 @@ def autolabel(rects):
             ha='center', va='bottom'
         )
 
-# set position of bar on x-axis
-xbar1 = np.arange(N_GROUPED_BARS)
-xbar2 = [x + BAR_WIDTH for x in xbar1]
-xbar3 = [x + BAR_WIDTH for x in xbar2]
 
 def animate():
 
@@ -46,7 +32,7 @@ def animate():
     # fully qualified domain name 
     fqdn = socket.getfqdn()
     ip_address = socket.gethostbyname(hostname)
-    port = 33332
+    port = METRICS_SOCKETS["metric2"]["port"]
     print(f"server working on {hostname} {fqdn} with {ip_address}")
     sckt_addr = (ip_address, port)
     print(f"starting up on {sckt_addr[0]} port {sckt_addr[1]}")
@@ -72,7 +58,8 @@ def animate():
             data = connection.recv(1024)
 
             if data:
-                # output received data
+                print("going to print data")
+                print(data)
                 unserialised_data = pickle.loads(data)
                 aid = int(unserialised_data[1])
 
@@ -88,11 +75,11 @@ def animate():
                     plt.xlabel("Identifiant des articles")
                     plt.ylabel("Cliques count")
                     plt.xticks(aid_list)
-                    rect = plt.bar(aid_list, click_list, width=0.5, color='blue', label="Click count bar")
+                    rect = plt.bar(aid_list, click_list, width=0.8, color="#ef9a9a", label="Click count bar")
                     autolabel(rect)
                     plt.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", mode="expand", borderaxespad=0, ncol=3)
                     fig.canvas.draw()
-                    sleep(3)
+                    sleep(10)
                     plt.cla()
 
             else:

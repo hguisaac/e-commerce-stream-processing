@@ -7,7 +7,6 @@ from helper import METRICS_SOCKETS
 import socket 
 import pickle
 
-
 # bind each promotion (promo_[0,A,B]) to each bar
 # bind each count to the appropriate bar height
 
@@ -41,7 +40,6 @@ def animate():
 
     isset_legend = False
     isset_bars_label = False
-    isset_data = False
     # BEGIN SOCKET_INIT
     sckt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     hostname = socket.gethostname()
@@ -91,34 +89,29 @@ def animate():
                 if isset_bars_label == False:
                     bar_labels = [promotions_count_list[nth_win][0][0] for nth_win in range(N_GROUPED_BARS)]
                 
-                # output received data
                 unserialised_data = pickle.loads(data)
                 print("data:", unserialised_data)
                 promotions_count_list.append(unserialised_data)            
 
-                rects1 = plt.bar(xbar1, bar1_heights, color=BARS_COLOR[0], width=BAR_WIDTH, edgecolor='white', label='Promo_0')
-                rects2 = plt.bar(xbar2, bar2_heights, color=BARS_COLOR[1], width=BAR_WIDTH, edgecolor='white', label='Promo_A')
-                rects3 = plt.bar(xbar3, bar3_heights, color=BARS_COLOR[2], width=BAR_WIDTH, edgecolor='white', label='Promo_B')
-                
-                if isset_data == False:
-                    isset_data = True
-                else:
-                    autolabel(rects1)
-                    autolabel(rects2)
-                    autolabel(rects3)
+                rects1 = plt.bar(xbar1, bar1_heights, color=BARS_COLOR[0], width=BAR_WIDTH, edgecolor='white', label='var1')
+                rects2 = plt.bar(xbar2, bar2_heights, color=BARS_COLOR[1], width=BAR_WIDTH, edgecolor='white', label='var2')
+                rects3 = plt.bar(xbar3, bar3_heights, color=BARS_COLOR[2], width=BAR_WIDTH, edgecolor='white', label='var3')
 
+                autolabel(rects1)
+                autolabel(rects2)
+                autolabel(rects3)
 
                 plt.xlabel("Fenêtres de Traitements", fontweight="bold")
                 plt.ylabel("Nombres d'Achats", fontweight="bold")
 
-                # if isset_legend == False:
-                plt.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", mode="expand", borderaxespad=0, ncol=3)
-                # isset_legend = True
+                if isset_legend == False:
+                    plt.legend()
+                    isset_legend = True
 
                 plt.xticks([r + BAR_WIDTH for r in range(N_GROUPED_BARS)], win_labels)
 
                 fig.canvas.draw()
-                sleep(1)
+                sleep(3)
                 plt.cla()
             else:
                 # no more data -- quit the loop
@@ -131,7 +124,7 @@ def animate():
     
 
 # make the plot
-fig = plt.figure(figsize=(20,20))
+fig = plt.figure()
 win = fig.canvas.manager.window
 win.after(100, animate)
 plt.show()

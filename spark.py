@@ -359,8 +359,8 @@ def article_humour_counts (
 
 
 # compute_promotion_counts().awaitTermination()
-compute_click_counts().awaitTermination()
-# compute_bookmark_counts()
+# compute_click_counts().awaitTermination()
+compute_bookmark_counts().awaitTermination()
 # article_humour_counts().awaitTermination()
 
 # ssession.streams.awaitAnyTermination()

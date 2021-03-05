@@ -31,19 +31,12 @@ def sckt_connect(sckt_addr:dict):
     return sckt
 
 
-
-# def create_client_sckt(socket_address=("127.0.1.1", 33332)):
-#     # global sckt
-#     sckt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#     sckt.connect(socket_address)
-#     return sckt
-
 def send_data():
     pass
 
 # send_data.promotion_count_sckt = sckt_connect(METRICS_SOCKETS["metric1"])
-send_data.click_count_sckt = sckt_connect(METRICS_SOCKETS["metric2"])
-# send_data.bookmark_count_sckt = sckt_connect(METRICS_SOCKETS["metric3"])
+# send_data.click_count_sckt = sckt_connect(METRICS_SOCKETS["metric2"])
+send_data.bookmark_count_sckt = sckt_connect(METRICS_SOCKETS["metric3"])
 # send_data.article_humour_count_sckt = sckt_connect(METRICS_SOCKETS["metric4"])
 
 
@@ -208,13 +201,13 @@ article_bad_comment_count_thread = Thread(
 
 print("starting threads")
 # promotion_counts_thread.start()
-click_counts_thread.start()
-# bookmark_counts_thread.start()
+# click_counts_thread.start()
+bookmark_counts_thread.start()
 # article_bad_comment_count_thread.start()
 
 print("joining threads")
 # promotion_counts_thread.join()
-click_counts_thread.join()
-# bookmark_counts_thread.join()
+# click_counts_thread.join()
+bookmark_counts_thread.join()
 # article_bad_comment_count_thread.join()
 

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from random import shuffle, randint
 from time import sleep
 from collections import deque
-from helper import G,M, W
+from helper import G,M, W, METRICS_SOCKETS
 from utils import autolabel
 
 import socket 
@@ -39,7 +39,7 @@ def animate():
     # fully qualified domain name 
     fqdn = socket.getfqdn()
     ip_address = socket.gethostbyname(hostname)
-    port = 33334
+    port = METRICS_SOCKETS["metric4"]["port"]
     print(f"server working on {hostname} {fqdn} with {ip_address}")
     server_sckt = (ip_address, port)
     print(f"starting up on {server_sckt[0]} port {server_sckt[1]}")
@@ -50,8 +50,6 @@ def animate():
     # END SOCKET_INIT
     
     # we initialize the dataset that we gonna plot
-
-
 
     try:
         # show who connected to us
