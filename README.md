@@ -1,9 +1,9 @@
-Realtime Stream Processsing System: Case of E-commerce
+# Realtime Stream Processsing System: Case of E-commerce
 
 
 ## Kappa Based Architecture
 
-
+```txt
 _____________________________    _____________________	     _______________________
 |                           |	 |	             |	     |		           |
 | [Stream Generation Layer] |	 | [Ingestion Layer] |       |	[Processing Layer] |
@@ -19,7 +19,7 @@ _____________________________    _____________________	     ____________________
 				|_____________________|
 					
 					   
-
+```
 
 
 
