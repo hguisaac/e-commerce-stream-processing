@@ -1,4 +1,5 @@
-# Realtime Stream Processsing System: Case of E-commerce
+# Realtime Stream Processsing System: 
+Case of E-commerce
 
 
 ## Kappa Based Architecture
